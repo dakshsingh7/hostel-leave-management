@@ -1,4 +1,0 @@
-PORT=5001
-MONGODB_URI=mongodb+srv://dakshsingh8528:daksh123@cluster0.l1bc5mk.mongodb.net/hostel?retryWrites=true&w=majority
-JWT_SECRET=hostel_jwt_secret_2025
-NODE_ENV=development
