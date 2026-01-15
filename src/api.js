@@ -1,41 +1,6 @@
-// Determine API base URL based on environment and current hostname
-function getApiBaseUrl() {
-  // If explicitly set via env variable, use that
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
-  
-  // In development, check if we're on localhost or network
-  if (import.meta.env.DEV) {
-    const hostname = window.location.hostname;
-    const protocol = window.location.protocol;
-    
-    // If on localhost, use proxy (works for local dev)
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return '/api';
-    }
-    
-    // If on network IP (e.g., 192.168.x.x), connect directly to backend on same IP
-    // Backend port is 5001
-    if (hostname.match(/^\d+\.\d+\.\d+\.\d+$/)) {
-      return `${protocol}//${hostname}:5001/api`;
-    }
-  }
-  
-  // Production fallback - try to use same hostname as frontend
-  const hostname = window.location.hostname;
-  const protocol = window.location.protocol;
-  
-  // If production is on network IP, use that for backend
-  if (hostname.match(/^\d+\.\d+\.\d+\.\d+$/)) {
-    return `${protocol}//${hostname}:5001/api`;
-  }
-  
-  // Default fallback
-  return 'http://localhost:5001/api';
-}
+// src/api.js
 
-const API_BASE_URL = getApiBaseUrl();
+const API_BASE_URL = 'https://hostel-leave-management-production.up.railway.app/api';
 
 // Get auth token from localStorage
 function getToken() {
@@ -54,6 +19,7 @@ function setToken(token) {
 // Make API request with authentication
 async function apiRequest(endpoint, options = {}) {
   const token = getToken();
+
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
@@ -63,22 +29,18 @@ async function apiRequest(endpoint, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
 
-    const data = await response.json();
+  const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || 'Request failed');
-    }
-
-    return data;
-  } catch (error) {
-    throw error;
+  if (!response.ok) {
+    throw new Error(data.error || 'Request failed');
   }
+
+  return data;
 }
 
 // Auth API
@@ -108,7 +70,7 @@ export const requestsAPI = {
     const queryParams = new URLSearchParams();
     if (filters.studentEmail) queryParams.append('studentEmail', filters.studentEmail);
     if (filters.status) queryParams.append('status', filters.status);
-    
+
     const queryString = queryParams.toString();
     return await apiRequest(`/requests${queryString ? `?${queryString}` : ''}`);
   },
@@ -137,4 +99,3 @@ export const requestsAPI = {
     });
   },
 };
-
